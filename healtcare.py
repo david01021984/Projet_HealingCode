@@ -1,6 +1,7 @@
 import time
 import pygame
 import threading
+from tabulate import tabulate
 
 
 class Lieu():
@@ -42,6 +43,7 @@ class Docteur(Personnage):
     def diagnostiquer(self, patient, diagnostique):
         patient.maladie = diagnostique.maladie
         print(f"Je vous annonce que vous avez un {diagnostique}")
+        return patient.maladie
 
     
     def se_faire_payer(self,patient,montant_consultation=50):
@@ -55,7 +57,7 @@ class Docteur(Personnage):
     def prescrire(self,patient,diagnostique):
         prescription = diagnostique.traitement
         return prescription
-
+    
 
 class Patient(Personnage):
     Patients = []
@@ -64,6 +66,7 @@ class Patient(Personnage):
         self.maladie = maladie
         self.etat_de_sante = etat_de_sante
         Patient.Patients.append(self)
+    
 
 class Traitement():
     Traitements = []
@@ -77,6 +80,7 @@ class Traitement():
     
     def __repr__(self):
         return self.nom
+    
 
 class Diagnostique():
     Diagnostiques = []
@@ -106,11 +110,12 @@ class Chat():
         pygame.mixer.music.load("meow.wav") 
 
 
-    def miaule(self,stop_flag):
-        while not stop_flag.is_set():
-            pygame.mixer.music.play()
-            time.sleep(4)
-            pygame.mixer.music.stop()
+    def miaule(self):
+    #while not stop_flag.is_set():
+        pygame.mixer.music.play(loops=20)
+        time.sleep(4)
+        #pygame.mixer.music.stop()
+
 
 #init    
 chat_du_doc = Chat("Xerxès","Sphynx")
@@ -149,37 +154,115 @@ darthvader = Patient("Vador",140, chez_vador,poche=[])
 romulus = Patient("Romulus",240, chez_romulus,poche=[])
 remus = Patient("Remus",60, chez_remus,poche=[])
 
-pharma_chez_baba = Pharmacie("Pharmacie chez Baba",["Le Pharmacien (Baba)"],[antiviraux,sedocar,insuline,antihistaminique,antibiotique])
+pharma_chez_baba = Pharmacie("Pharmacie chez Baba",["Le Pharmacien (Baba)"],[antiviraux,sedocar,insuline,antihistaminique,antibiotique,nouveau_traitement_covid])
+
+
+def displaySalleAttente():
+    dataSA = []
+
+    for patient in Patient.Patients:
+        line = [f"{patient.nom}",f"{patient.maladie}",f"{patient.argent}",f"{patient.poche}",f"{patient.etat_de_sante}"]
+        dataSA.append(line)
+
+    tableSA = tabulate(dataSA, headers=["Nom","Maladie","Argent","Poche","État de Santé"], tablefmt="pipe")
+
+    print("Suivi salle d'attente : \n")
+    print(tableSA)
+    print("\n")
+
+def displayCabinet(docteur):
+    patient_in = " "
+    patient_out = " " 
+    dataCabinet = []
+    for patient in Patient.Patients:
+        if patient.maladie != "unknown" : patient_out = patient.nom
+        line = [f"{docteur.nom}",f"{docteur.argent}",f"{docteur.lieu.personnes}",f"{patient.maladie}",f"{patient_in}",f"{patient_out}"]
+        dataCabinet.append(line)
+
+    tableCabinet = tabulate(dataCabinet, headers=["Nom","Argent","Cabinet","Diagnostique","patient IN","Patient OUT"], tablefmt="pipe")
+
+    print("Suivi Cabinet : \n")
+    print(tableCabinet)
+    print("\n")
+
+def displayTraitements():
+    dataTrait = []
+    
+    for traitement in Traitement.Traitements:
+        line = [f"{traitement.nom}",f"{traitement.prix}"]
+        dataTrait.append(line)
+        
+    # Créer le tableau avec tabulate
+    tableTrait = tabulate(dataTrait, headers=["Nom du traitement","Prix"], tablefmt="pipe")
+
+    # Afficher le tableau
+    print("Tableau des Traitements : \n")
+    print(tableTrait) 
+    print("\n")
+
+def displayDiags():
+    dataDiags = []
+    
+    for diagnostique in Diagnostique.Diagnostiques:
+        line = [f"{diagnostique.maladie}",f"{diagnostique.traitement}"]
+        dataDiags.append(line)
+        
+    # Créer le tableau avec tabulate
+    tableDiags = tabulate(dataDiags, headers=["Maladie","Traitement"], tablefmt="pipe")
+
+    # Afficher le tableau
+    print("Tableau des diagnostiques :\n")
+    print(tableDiags) 
+    print("\n")
+    
+def displayPharma(pharmacie):
+    dataPharma = []
+        # Créer le tableau avec tabulate
+    for patient in Patient.Patients:
+        if patient.argent >= patient
+        line = [f"{pharmacie.nom}",f"{pharmacie.caisse}",f"{patient.nom}",f"{patient.argent}",]
+        dataPharma.append(line)
+
+    tablePharma = tabulate(dataPharma, headers=["Pharmacie","En caisse","Patient","Solde","Solvable"], tablefmt="pipe")
+
+    # Afficher le tableau
+    print("Tableau des diagnostiques :\n")
+    print(tablePharma) 
+    print("\n")
 
 
 def main():
-    try:
-        # Code principal
-        #print(pharma_chez_baba.traitements_en_stock)
-        #print(cabinet_Dr_X.personnes)
-        marcus.seDeplacer(chez_Marcus,salle_attente_Dr_X)
-        optimus.seDeplacer(chez_Optimus,salle_attente_Dr_X)
-        sangoku.seDeplacer(chez_sangoku,salle_attente_Dr_X)
-        darthvader.seDeplacer(chez_vador,salle_attente_Dr_X)
-        romulus.seDeplacer(chez_romulus,salle_attente_Dr_X)
-        remus.seDeplacer(chez_remus,salle_attente_Dr_X)
-        print(salle_attente_Dr_X.personnes)
+    #try:
+    # Code principal
+    #print(pharma_chez_baba.traitements_en_stock)
+    #print(cabinet_Dr_X.personnes)
+    #on met tous les patients dans la salle d'attente
+    marcus.seDeplacer(chez_Marcus,salle_attente_Dr_X)
+    optimus.seDeplacer(chez_Optimus,salle_attente_Dr_X)
+    sangoku.seDeplacer(chez_sangoku,salle_attente_Dr_X)
+    darthvader.seDeplacer(chez_vador,salle_attente_Dr_X)
+    romulus.seDeplacer(chez_romulus,salle_attente_Dr_X)
+    remus.seDeplacer(chez_remus,salle_attente_Dr_X)
+    #print(salle_attente_Dr_X.personnes)
+    
+    displaySalleAttente()
 
-        print("| Nom       | Argent | Cabinet | Diagnostique | Patient In | Patient Out |")
-        print("| --------- | ------ | ------- | ------------ | ---------- | ----------- |")
-        for patient in Patient.Patients:
-            print(f"|    {patient.nom}   |  {patient.argent}  |   {doc.nom}   |  {patient.maladie}  |      X      |           | ")
-            print("| --------- | ------ | ------- | ------------ | ---------- | ----------- |")
-
-    finally:
+    displayCabinet(doc)
+    displayDiags()
+    #displayTraitements()
+    #finally:
         # Définir le drapeau pour demander au thread de travail de s'arrêter
-        stop_flag.set()
+        #stop_flag.set()
+
+
+
+
 
 # Créer un drapeau partagé entre le thread principal et le thread de travail
 stop_flag = threading.Event()
 
 # Créez un thread pour la fonction chat_du_doc.miaule() and play_sound
-sound_thread = threading.Thread(target=chat_du_doc.miaule(stop_flag))
+sound_thread = threading.Thread(target=chat_du_doc.miaule())
 
 # Lancez le thread pour jouer le son en parallèle
 sound_thread.start()
