@@ -256,7 +256,7 @@ def displayPharma(pharmacie,dataPharma):
             line = [f"{pharmacie.nom}",f"{pharmacie.caisse}",f"{patient.nom}",f"{patient.argent}",f"{patient.poche.nom}",f"{patient.poche.prix}",f"{solvabilite}",f"{patient.etat_de_sante}"]
             dataPharma.append(line)
 
-    tablePharma = tabulate(dataPharma, headers=["Pharmacie","En caisse","Patient","Solde","Traitement","Prix","Solvable","Etat patient"], tablefmt="pipe")
+    tablePharma = tabulate(dataPharma, headers=["Pharmacie","En caisse","Patient","Solde","Traitement","Prix","Solvabilite","Etat patient"], tablefmt="pipe")
 
     # Afficher le tableau
     print("Tableau des diagnostiques :\n")
@@ -314,7 +314,7 @@ def main():
     marcus.seDeplacer(cabinet_Dr_X,pharma_chez_baba)
 
     displayPharma(pharma_chez_baba,dataPharma_Baba)
-
+    
     marcus.payerMedoc(marcus.poche,pharma_chez_baba)
 
     dataPharma_Baba = displayPharma(pharma_chez_baba,dataPharma_Baba)
