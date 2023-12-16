@@ -280,7 +280,6 @@ def displayPharma(pharmacie,dataPharma):
 
 def displayCimetiere():
     dataCim = []
-  #  seen_patients = set()
 
     for patient in Patient.Patients:
         if patient.etat_de_sante == "Mort":
@@ -492,18 +491,18 @@ def main():
     doc.se_faire_payer(remus,50)
 
     displayCabinet(doc)
-    displaySalleAttente()
+  #  displaySalleAttente()
 
     doc.prescrire(remus,nouveau_traitement_covid)
 
-    displaySalleAttente()
+  #  displaySalleAttente()
 
     displayCabinet(doc)
 
     doc.inviter_a_quitter(remus,cabinet_Dr_X)
 
     displayCabinet(doc)
-    displaySalleAttente()
+   # displaySalleAttente()
 
     remus.seDeplacer(cabinet_Dr_X,pharma_chez_baba)
 
