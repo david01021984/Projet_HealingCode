@@ -15,11 +15,13 @@ class Personnage():
 # Personnage: Représente un personnage avec un nom, une quantité d'argent, un lieu actuel, 
 # et des objets dans ses mains droite et gauche
 
-    def __init__(self, nom, argent:float, lieu , poche=[]):
+    def __init__(self, nom, argent:float, lieu , poche=None):
         self.nom = nom
         self.lieu = lieu
         self.argent = argent
-        self.poche = poche
+        self.poche = [] if poche is None else poche
+
+
     
     def seDeplacer(self, depart,destination):
         if self.nom in depart.personnes:
@@ -80,10 +82,12 @@ class Docteur(Personnage):
 
 class Patient(Personnage):
     Patients = []
-    def __init__(self, nom, argent, lieu, poche, maladie = "unknown", etat_de_sante = "Malade"):
+    def __init__(self, nom, argent, lieu, poche, maladie = None, etat_de_sante = None):
+        #symptomes = None
         super().__init__(nom, argent, lieu, poche)
-        self.maladie = maladie
-        self.etat_de_sante = etat_de_sante
+        self.maladie = "unknown" if maladie is None else maladie
+        self.etat_de_sante = "Malade" if etat_de_sante is None else etat_de_sante
+#       self.symptomes = [] if symptomes is None else symptomes
         Patient.Patients.append(self)
     
     def payerMedoc(self, medoc,pharmacie):
@@ -125,12 +129,6 @@ class Diagnostique():
     def __repr__(self):
             return self.nom
 
-class Lieu():
-# Lieu: Représente un lieu avec un nom et une liste de personnes présentes
-    def __init__(self, nom, personnes = None):
-        self.nom = nom
-        self.personnes = [] if personnes is None else personnes
-
 class Pharmacie(Lieu):
     def __init__(self, nom, personnes=None,traitements_en_stock=[],caisse=500):
         super().__init__(nom, personnes)
@@ -143,7 +141,6 @@ class Chat():
         self.race = race
         pygame.mixer.init()  # Initialize the mixer
         pygame.mixer.music.load("meow.wav") 
-
 
     def miaule(self):
     #while not stop_flag.is_set():
