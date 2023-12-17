@@ -159,52 +159,6 @@ class Chat():
         time.sleep(4)
         #pygame.mixer.music.stop()
 
-
-#init    
-chat_du_doc = Chat("Xerxès","Sphynx")
-#chat_du_doc.miaule()
-
-mutuelle = Assurance("Mutuelle", 0.5)  # 50% couverture avec la mutuelle
-dkv = Assurance("Premium DKV", 0.8)  # 80% couverture avec la DKV
-
-antiviraux = Traitement("Antiviraux", 8.7)
-sedocar = Traitement("Sedocar",12)
-insuline = Traitement("Insuline",6)
-antihistaminique = Traitement("Antihistaminiques", 12)
-antibiotique = Traitement("Antibiotique", 9.8)
-nouveau_traitement_covid = Traitement("COVID",35)
-
-grippe = Diagnostique("Grippe",antiviraux)
-hypertension = Diagnostique("Hypertension",sedocar)
-diabete = Diagnostique("Diabète",insuline)
-rhume_foin = Diagnostique("Rhume des foins",antihistaminique)
-infection_urinaire = Diagnostique("Infection urinaire",antibiotique)
-covid = Diagnostique("Covid SARS",nouveau_traitement_covid)
-
-cabinet_Dr_X = Lieu("Cabinet du Docteur X", personnes=["Dr X","Xerxès le Sphynx"])
-salle_attente_Dr_X = Lieu("Salle d'attente")
-
-chez_Marcus = Lieu("Maison de Marcus",["Marcus"])
-chez_Optimus = Lieu("Maison d'Optimus",["Optimus"])
-chez_sangoku = Lieu("Temple de Goku",["SanGoku"])
-chez_vador = Lieu("Vaisseau de Darth Vador",["Darth Vador"])
-chez_romulus = Lieu("Chez Romulus",["Romulus"])
-chez_remus = Lieu("Chez Remus",["Remus"])
-
-doc = Docteur("Dr X",1000,cabinet_Dr_X,poche=[],specialisation="Généraliste")
-
-marcus = Patient("Marcus",40,chez_Marcus,poche=[])
-marcus.assurance = dkv
-optimus = Patient("Optimus",200,chez_Optimus,poche=[])
-sangoku = Patient("Sangoku",80,chez_sangoku,poche=[])
-sangoku.assurance = mutuelle
-darthvader = Patient("Vador",140, chez_vador,poche=[])
-romulus = Patient("Romulus",240, chez_romulus,poche=[])
-remus = Patient("Remus",60, chez_remus,poche=[])
-
-pharma_chez_baba = Pharmacie("Pharmacie chez Baba",["Le Pharmacien (Baba)"],[antiviraux,sedocar,insuline,antihistaminique,antibiotique,nouveau_traitement_covid])
-
-
 class DisplayManager():
     def __init__(self) -> None:
         pass
@@ -318,6 +272,49 @@ class DisplayManager():
         print("\n")
         time.sleep(2)
 
+#init    
+chat_du_doc = Chat("Xerxès","Sphynx")
+#chat_du_doc.miaule()
+
+mutuelle = Assurance("Mutuelle", 0.5)  # 50% couverture avec la mutuelle
+dkv = Assurance("Premium DKV", 0.8)  # 80% couverture avec la DKV
+
+antiviraux = Traitement("Antiviraux", 8.7)
+sedocar = Traitement("Sedocar",12)
+insuline = Traitement("Insuline",6)
+antihistaminique = Traitement("Antihistaminiques", 12)
+antibiotique = Traitement("Antibiotique", 9.8)
+nouveau_traitement_covid = Traitement("Traitement COVID",35)
+
+grippe = Diagnostique("Grippe",antiviraux)
+hypertension = Diagnostique("Hypertension",sedocar)
+diabete = Diagnostique("Diabète",insuline)
+rhume_foin = Diagnostique("Rhume des foins",antihistaminique)
+infection_urinaire = Diagnostique("Infection urinaire",antibiotique)
+covid = Diagnostique("Covid SARS",nouveau_traitement_covid)
+
+cabinet_Dr_X = Lieu("Cabinet du Docteur X", personnes=["Dr X","Xerxès le Sphynx"])
+salle_attente_Dr_X = Lieu("Salle d'attente")
+
+chez_Marcus = Lieu("Maison de Marcus",["Marcus"])
+chez_Optimus = Lieu("Maison d'Optimus",["Optimus"])
+chez_sangoku = Lieu("Temple de Goku",["SanGoku"])
+chez_vador = Lieu("Vaisseau de Darth Vador",["Darth Vador"])
+chez_romulus = Lieu("Chez Romulus",["Romulus"])
+chez_remus = Lieu("Chez Remus",["Remus"])
+
+doc = Docteur("Dr X",1000,cabinet_Dr_X,poche=[],specialisation="Généraliste")
+
+marcus = Patient("Marcus",40,chez_Marcus,poche=[])
+marcus.assurance = dkv
+optimus = Patient("Optimus",200,chez_Optimus,poche=[])
+sangoku = Patient("Sangoku",80,chez_sangoku,poche=[])
+sangoku.assurance = mutuelle
+darthvader = Patient("Vador",140, chez_vador,poche=[])
+romulus = Patient("Romulus",240, chez_romulus,poche=[])
+remus = Patient("Remus",60, chez_remus,poche=[])
+
+pharma_chez_baba = Pharmacie("Pharmacie chez Baba",["Le Pharmacien (Baba)"],[antiviraux,sedocar,insuline,antihistaminique,antibiotique,nouveau_traitement_covid])
 
 display_manager = DisplayManager()
 def main():
