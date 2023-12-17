@@ -541,21 +541,19 @@ def main():
     display_manager.displayTraitements()
 
 
-
-
-# Créer un drapeau partagé entre le thread principal et le thread de travail
+# Crée un drapeau partagé entre le thread principal et le thread de travail
 stop_flag = threading.Event()
 
-# Créez un thread pour la fonction chat_du_doc.miaule() and play_sound
+# Crée un thread pour la fonction chat_du_doc.miaule() and play_sound
 sound_thread = threading.Thread(target=chat_du_doc.miaule())
 
-# Lancez le thread pour jouer le son en parallèle
+# Lance le thread pour jouer le son en parallèle
 sound_thread.start()
 
-# Exécutez votre fonction main() en même temps
+# Exécute la fonction main() en même temps
 main()
 
-# Attendez que le thread de son se termine avant de quitter complètement le programme
+# Attends que le thread de son se termine avant de quitter complètement le programme
 sound_thread.join()
 
 
