@@ -49,10 +49,11 @@ class Docteur(Personnage):
         
 
     def se_faire_payer(self,patient,montant_consultation = 50):
-        #attention on dirait que le doc paie le patient
-        if patient.argent >= montant_consultation:
-            self.argent += montant_consultation
-            patient.argent -= montant_consultation
+        prix_a_payer = montant_consultation * (1 - patient.assurance.couverture) if patient.assurance else montant_consultation
+
+        if patient.argent >= prix_a_payer:
+            self.argent += prix_a_payer
+            patient.argent -= prix_a_payer
             print(f"{patient.nom} a payé sa visite che le docteur {self.nom}")
         else :
             print("Je ne peux pas vous soigner mais il existe des plannings familliaux")
@@ -65,6 +66,7 @@ class Docteur(Personnage):
             print(f"Allez à la pharmacie chercher {traitement.nom}")
         else :
             print("Encore désolé mais sans payer ma consultation, je ne peux pas vous donner de prescritpion!")
+            print("Allez vous inscrire à la mutuelle ou prenez une autre assurance et revenez!")
 
     
     def inviter_a_entrer(self,patient,cabinet):
@@ -82,25 +84,29 @@ class Docteur(Personnage):
 
 class Patient(Personnage):
     Patients = []
-    def __init__(self, nom, argent, lieu, poche, maladie = None, etat_de_sante = None):
+    def __init__(self, nom, argent, lieu, poche, maladie = None, etat_de_sante = None, assurance=None):
         #symptomes = None
         super().__init__(nom, argent, lieu, poche)
         self.maladie = "unknown" if maladie is None else maladie
         self.etat_de_sante = "Malade" if etat_de_sante is None else etat_de_sante
+        self.assurance = assurance
 #       self.symptomes = [] if symptomes is None else symptomes
         Patient.Patients.append(self)
     
     def payerMedoc(self, medoc,pharmacie):
-        if self.poche != [] and self.argent >= medoc.prix:
-            self.argent -= medoc.prix
-            pharmacie.caisse += medoc.prix
+        prix_a_payer = medoc.prix * (1 - self.assurance.couverture) if self.assurance else medoc.prix
+
+        if self.poche != [] and self.argent >= prix_a_payer:
+            self.argent -= prix_a_payer
+            pharmacie.caisse += prix_a_payer
             pharmacie.traitements_en_stock.remove(medoc)
             self.etat_de_sante = "En traitement"
-            print(f"{self.nom} paie {medoc.nom} au prix de {medoc.prix} à {pharmacie.nom}")
+            print(f"{self.nom} paie {medoc.nom} au prix de {prix_a_payer} à {pharmacie.nom}")
         else : 
+            print("Je ne peux pas vous donner de medicaments si vous n'avez pas de quoi payer!")
+            print("Allez vous inscrire à la mutuelle ou prenez une autre assurance et revenez!")
             self.etat_de_sante = "Mort"
 
-    
 
 class Traitement():
     Traitements = []
@@ -128,6 +134,11 @@ class Diagnostique():
     
     def __repr__(self):
             return self.nom
+    
+class Assurance():
+    def __init__(self, nom, couverture):
+        self.name = nom
+        self.couverture = couverture
 
 class Pharmacie(Lieu):
     def __init__(self, nom, personnes=None,traitements_en_stock=[],caisse=500):
@@ -152,6 +163,9 @@ class Chat():
 #init    
 chat_du_doc = Chat("Xerxès","Sphynx")
 #chat_du_doc.miaule()
+
+mutuelle = Assurance("Mutuelle", 0.5)  # 50% couverture avec la mutuelle
+dkv = Assurance("Premium DKV", 0.8)  # 80% couverture avec la DKV
 
 antiviraux = Traitement("Antiviraux", 8.7)
 sedocar = Traitement("Sedocar",12)
@@ -180,8 +194,10 @@ chez_remus = Lieu("Chez Remus",["Remus"])
 doc = Docteur("Dr X",1000,cabinet_Dr_X,poche=[],specialisation="Généraliste")
 
 marcus = Patient("Marcus",40,chez_Marcus,poche=[])
+marcus.assurance = dkv
 optimus = Patient("Optimus",200,chez_Optimus,poche=[])
 sangoku = Patient("Sangoku",80,chez_sangoku,poche=[])
+sangoku.assurance = mutuelle
 darthvader = Patient("Vador",140, chez_vador,poche=[])
 romulus = Patient("Romulus",240, chez_romulus,poche=[])
 remus = Patient("Remus",60, chez_remus,poche=[])
@@ -189,111 +205,121 @@ remus = Patient("Remus",60, chez_remus,poche=[])
 pharma_chez_baba = Pharmacie("Pharmacie chez Baba",["Le Pharmacien (Baba)"],[antiviraux,sedocar,insuline,antihistaminique,antibiotique,nouveau_traitement_covid])
 
 
-def displaySalleAttente():
-    dataSA = []
+class DisplayManager():
+    def __init__(self) -> None:
+        pass
 
-    for patient in Patient.Patients:
-        if patient.lieu == salle_attente_Dr_X.nom:
-            line = [f"{patient.nom}",f"{patient.maladie}",f"{patient.argent}",f"{patient.poche}",f"{patient.etat_de_sante}"]
-            dataSA.append(line)
+    def displaySalleAttente(self):
+        dataSA = []
 
-    tableSA = tabulate(dataSA, headers=["Nom","Maladie","Argent","Prescription","État de Santé"], tablefmt="pipe")
+        for patient in Patient.Patients:
+            if patient.lieu == salle_attente_Dr_X.nom:
+                line = [f"{patient.nom}",f"{patient.maladie}",f"{patient.argent}",f"{patient.poche}",f"{patient.etat_de_sante}"]
+                dataSA.append(line)
 
-    print("Suivi salle d'attente : \n")
-    print(tableSA)
-    print("\n")
+        tableSA = tabulate(dataSA, headers=["Nom","Maladie","Argent","Prescription","État de Santé"], tablefmt="pipe")
+
+        print("Suivi salle d'attente : \n")
+        print(tableSA)
+        print("\n")
+        time.sleep(2)
 
 
-def displayCabinet(docteur):
-    dataCabinet = []
-    for patient in Patient.Patients:
-        patient_in = " "
-        patient_out = " " 
-        if patient.lieu == docteur.lieu: 
-            patient_in = patient.nom
-        if patient.poche != [] and patient.lieu != docteur.lieu: 
-            patient_out = patient.nom
+    def displayCabinet(self,docteur):
+        dataCabinet = []
+        for patient in Patient.Patients:
             patient_in = " "
-        line = [f"{docteur.nom}",f"{docteur.argent}",f"{docteur.lieu.personnes}",f"{patient.maladie}",f"{patient_in}",f"{patient_out}"]
-        dataCabinet.append(line)
+            patient_out = " " 
+            if patient.lieu == docteur.lieu: 
+                patient_in = patient.nom
+            if patient.poche != [] and patient.lieu != docteur.lieu: 
+                patient_out = patient.nom
+                patient_in = " "
+            line = [f"{docteur.nom}",f"{docteur.argent}",f"{docteur.lieu.personnes}",f"{patient.maladie}",f"{patient_in}",f"{patient_out}"]
+            dataCabinet.append(line)
 
-    tableCabinet = tabulate(dataCabinet, headers=["Nom","Argent","Cabinet","Diagnostique","patient IN","Patient OUT"], tablefmt="pipe")
+        tableCabinet = tabulate(dataCabinet, headers=["Nom","Argent","Cabinet","Diagnostique","patient IN","Patient OUT"], tablefmt="pipe")
 
-    print("Suivi Cabinet : \n")
-    print(tableCabinet)
-    print("\n")
+        print("Suivi Cabinet : \n")
+        print(tableCabinet)
+        print("\n")
+        time.sleep(2)
 
 
-def displayTraitements():
-    dataTrait = []
-    
-    for traitement in Traitement.Traitements:
-        line = [f"{traitement.nom}",f"{traitement.prix}"]
-        dataTrait.append(line)
+    def displayTraitements(self):
+        dataTrait = []
         
-    # Créer le tableau avec tabulate
-    tableTrait = tabulate(dataTrait, headers=["Nom du traitement","Prix"], tablefmt="pipe")
+        for traitement in Traitement.Traitements:
+            line = [f"{traitement.nom}",f"{traitement.prix}"]
+            dataTrait.append(line)
+            
+        # Créer le tableau avec tabulate
+        tableTrait = tabulate(dataTrait, headers=["Nom du traitement","Prix"], tablefmt="pipe")
 
-    # Afficher le tableau
-    print("Tableau des Traitements : \n")
-    print(tableTrait) 
-    print("\n")
+        # Afficher le tableau
+        print("Tableau des Traitements : \n")
+        print(tableTrait) 
+        print("\n")
+
+        time.sleep(2)
 
 
-def displayDiags():
-    dataDiags = []
-    
-    for diagnostique in Diagnostique.Diagnostiques:
-        line = [f"{diagnostique.maladie}",f"{diagnostique.traitement}"]
-        dataDiags.append(line)
+    def displayDiags(self):
+        dataDiags = []
         
-    # Créer le tableau avec tabulate
-    tableDiags = tabulate(dataDiags, headers=["Maladie","Traitement"], tablefmt="pipe")
+        for diagnostique in Diagnostique.Diagnostiques:
+            line = [f"{diagnostique.maladie}",f"{diagnostique.traitement}"]
+            dataDiags.append(line)
+            
+        # Créer le tableau avec tabulate
+        tableDiags = tabulate(dataDiags, headers=["Maladie","Traitement"], tablefmt="pipe")
 
-    # Afficher le tableau
-    print("Tableau des diagnostiques :\n")
-    print(tableDiags) 
-    print("\n")
-    
-def displayPharma(pharmacie,dataPharma):  
-
-    for patient in Patient.Patients:
-        if patient.lieu == pharmacie.nom and patient.poche != []:
-            if patient.poche.prix > patient.argent:
-                solvabilite = "Insolvable"
-                patient.etat_de_sante = "Mort"
-            else :
-                solvabilite = "Solvable"
-                patient.etat_de_sante = "Va guérir"
-            line = [f"{pharmacie.nom}",f"{pharmacie.caisse}",f"{patient.nom}",f"{patient.argent}",f"{patient.poche.nom}",f"{patient.poche.prix}",f"{solvabilite}",f"{patient.etat_de_sante}"]
-            dataPharma.append(line)
-
-    tablePharma = tabulate(dataPharma, headers=["Pharmacie","En caisse","Patient","Solde","Traitement","Prix","Solvabilite","Etat patient"], tablefmt="pipe")
-
-    print("Tableau Pharmacie :\n")
-    print(tablePharma) 
-    print("\n")
-    return dataPharma
-
-def displayCimetiere():
-    dataCim = []
-
-    for patient in Patient.Patients:
-        if patient.etat_de_sante == "Mort":
-            line = [f"{patient.nom}",f"{patient.etat_de_sante}"]
-            dataCim.append(line)
+        # Afficher le tableau
+        print("Tableau des diagnostiques :\n")
+        print(tableDiags) 
+        print("\n")
+        time.sleep(2)
         
-    # Créer le tableau avec tabulate
-    tableCim = tabulate(dataCim, headers=["Patient","Etat"], tablefmt="pipe")
+    def displayPharma(self,pharmacie,dataPharma):  
 
-    # Afficher le tableau
-    print("Tableau Cimetière :\n")
-    print(tableCim) 
-    print("\n")
+        for patient in Patient.Patients:
+            if patient.lieu == pharmacie.nom and patient.poche != []:
+                if patient.poche.prix > patient.argent:
+                    solvabilite = "Insolvable"
+                    patient.etat_de_sante = "Mort"
+                else :
+                    solvabilite = "Solvable"
+                    patient.etat_de_sante = "Va guérir"
+                line = [f"{pharmacie.nom}",f"{pharmacie.caisse}",f"{patient.nom}",f"{patient.argent}",f"{patient.poche.nom}",f"{patient.poche.prix}",f"{solvabilite}",f"{patient.etat_de_sante}"]
+                dataPharma.append(line)
+
+        tablePharma = tabulate(dataPharma, headers=["Pharmacie","En caisse","Patient","Solde","Traitement","Prix","Solvabilite","Etat patient"], tablefmt="pipe")
+
+        print("Tableau Pharmacie :\n")
+        print(tablePharma) 
+        print("\n")
+        time.sleep(2)
+        return dataPharma
+
+    def displayCimetiere(self):
+        dataCim = []
+
+        for patient in Patient.Patients:
+            if patient.etat_de_sante == "Mort":
+                line = [f"{patient.nom}",f"{patient.etat_de_sante}"]
+                dataCim.append(line)
+            
+        # Créer le tableau avec tabulate
+        tableCim = tabulate(dataCim, headers=["Patient","Etat"], tablefmt="pipe")
+
+        # Afficher le tableau
+        print("Tableau Cimetière :\n")
+        print(tableCim) 
+        print("\n")
+        time.sleep(2)
 
 
-
-
+display_manager = DisplayManager()
 def main():
    
     #on met tous les patients dans la salle d'attente
@@ -306,41 +332,41 @@ def main():
     #print(salle_attente_Dr_X.personnes)
 
     #MARCUS SCENARIO
-    displaySalleAttente()
-    displayCabinet(doc)
+    display_manager.displaySalleAttente()
+    display_manager.displayCabinet(doc)
 
     doc.inviter_a_entrer(marcus,cabinet_Dr_X)
 
-    displayCabinet(doc)
-    displaySalleAttente()
+    display_manager.displayCabinet(doc)
+    display_manager.displaySalleAttente()
 
     doc.se_faire_payer(marcus,50)
     doc.diagnostiquer(marcus,grippe)
    
 
-    displayCabinet(doc)
-    displaySalleAttente()
+    display_manager.displayCabinet(doc)
+    display_manager.displaySalleAttente()
 
     doc.prescrire(marcus,antiviraux)
 
-    displaySalleAttente()
+    display_manager.displaySalleAttente()
 
-    displayCabinet(doc)
+    display_manager.displayCabinet(doc)
 
     doc.inviter_a_quitter(marcus,cabinet_Dr_X)
 
-    displayCabinet(doc)
-    displaySalleAttente()
+    display_manager.displayCabinet(doc)
+    display_manager.displaySalleAttente()
 
     dataPharma_Baba = []
     
     marcus.seDeplacer(cabinet_Dr_X,pharma_chez_baba)
 
-    dataPharma_Baba = displayPharma(pharma_chez_baba,dataPharma_Baba)
+    dataPharma_Baba = display_manager.displayPharma(pharma_chez_baba,dataPharma_Baba)
 
     marcus.payerMedoc(marcus.poche,pharma_chez_baba)
 
-    dataPharma_Baba = displayPharma(pharma_chez_baba,dataPharma_Baba)
+    dataPharma_Baba = display_manager.displayPharma(pharma_chez_baba,dataPharma_Baba)
 
     marcus.seDeplacer(pharma_chez_baba,chez_Marcus)
 
@@ -348,99 +374,99 @@ def main():
     
     doc.inviter_a_entrer(optimus,cabinet_Dr_X)
 
-    displayCabinet(doc)
-    displaySalleAttente()
+    display_manager.displayCabinet(doc)
+    display_manager.displaySalleAttente()
 
     doc.diagnostiquer(optimus,rhume_foin)
     doc.se_faire_payer(optimus,50)
 
-    displayCabinet(doc)
-    displaySalleAttente()
+    display_manager.displayCabinet(doc)
+    display_manager.displaySalleAttente()
 
     doc.prescrire(optimus,antihistaminique)
 
-    displaySalleAttente()
+    display_manager.displaySalleAttente()
 
-    displayCabinet(doc)
+    display_manager.displayCabinet(doc)
 
     doc.inviter_a_quitter(optimus,cabinet_Dr_X)
 
-    displayCabinet(doc)
-    displaySalleAttente()
+    display_manager.displayCabinet(doc)
+    display_manager.displaySalleAttente()
 
     optimus.seDeplacer(cabinet_Dr_X,pharma_chez_baba)
 
-    dataPharma_Baba = displayPharma(pharma_chez_baba,dataPharma_Baba)
+    dataPharma_Baba = display_manager.displayPharma(pharma_chez_baba,dataPharma_Baba)
 
     optimus.payerMedoc(optimus.poche,pharma_chez_baba)
 
-    dataPharma_Baba = displayPharma(pharma_chez_baba,dataPharma_Baba)
+    dataPharma_Baba = display_manager.displayPharma(pharma_chez_baba,dataPharma_Baba)
 
     optimus.seDeplacer(pharma_chez_baba,chez_Optimus)
 
     #SANGOKU SCENARIO
     doc.inviter_a_entrer(sangoku,cabinet_Dr_X)
 
-    displayCabinet(doc)
-    displaySalleAttente()
+    display_manager.displayCabinet(doc)
+    display_manager.displaySalleAttente()
 
     doc.diagnostiquer(sangoku,hypertension)
     doc.se_faire_payer(sangoku,50)
 
-    displayCabinet(doc)
-    displaySalleAttente()
+    display_manager.displayCabinet(doc)
+    display_manager.displaySalleAttente()
 
     doc.prescrire(sangoku,sedocar)
 
-    displaySalleAttente()
+    display_manager.displaySalleAttente()
 
-    displayCabinet(doc)
+    display_manager.displayCabinet(doc)
 
     doc.inviter_a_quitter(sangoku,cabinet_Dr_X)
 
-    displayCabinet(doc)
-    displaySalleAttente()
+    display_manager.displayCabinet(doc)
+    display_manager.displaySalleAttente()
 
     sangoku.seDeplacer(cabinet_Dr_X,pharma_chez_baba)
 
-    dataPharma_Baba = displayPharma(pharma_chez_baba,dataPharma_Baba)
+    dataPharma_Baba = display_manager.displayPharma(pharma_chez_baba,dataPharma_Baba)
 
     sangoku.payerMedoc(sangoku.poche,pharma_chez_baba)
 
-    dataPharma_Baba = displayPharma(pharma_chez_baba,dataPharma_Baba)
+    dataPharma_Baba = display_manager.displayPharma(pharma_chez_baba,dataPharma_Baba)
 
     sangoku.seDeplacer(pharma_chez_baba,chez_sangoku)
 
     #DARTHVADER SENARIO
     doc.inviter_a_entrer(darthvader,cabinet_Dr_X)
 
-    displayCabinet(doc)
-    displaySalleAttente()
+    display_manager.displayCabinet(doc)
+    display_manager.displaySalleAttente()
 
     doc.diagnostiquer(darthvader,infection_urinaire)
     doc.se_faire_payer(darthvader,60)
 
-    displayCabinet(doc)
-    displaySalleAttente()
+    display_manager.displayCabinet(doc)
+    display_manager.displaySalleAttente()
 
     doc.prescrire(darthvader,antibiotique)
 
-    displaySalleAttente()
+    display_manager.displaySalleAttente()
 
-    displayCabinet(doc)
+    display_manager.displayCabinet(doc)
 
     doc.inviter_a_quitter(darthvader,cabinet_Dr_X)
 
-    displayCabinet(doc)
-    displaySalleAttente()
+    display_manager.displayCabinet(doc)
+    display_manager.displaySalleAttente()
 
     darthvader.seDeplacer(cabinet_Dr_X,pharma_chez_baba)
 
-    dataPharma_Baba = displayPharma(pharma_chez_baba,dataPharma_Baba)
+    dataPharma_Baba = display_manager.displayPharma(pharma_chez_baba,dataPharma_Baba)
 
     darthvader.payerMedoc(darthvader.poche,pharma_chez_baba)
 
-    dataPharma_Baba = displayPharma(pharma_chez_baba,dataPharma_Baba)
+    dataPharma_Baba = display_manager.displayPharma(pharma_chez_baba,dataPharma_Baba)
 
     darthvader.seDeplacer(pharma_chez_baba,chez_vador)
 
@@ -448,70 +474,74 @@ def main():
     
     doc.inviter_a_entrer(romulus,cabinet_Dr_X)
 
-    displayCabinet(doc)
-    displaySalleAttente()
+    display_manager.displayCabinet(doc)
+    display_manager.displaySalleAttente()
 
     doc.diagnostiquer(romulus,covid)
     doc.se_faire_payer(romulus,50)
 
-    displayCabinet(doc)
-    displaySalleAttente()
+    display_manager.displayCabinet(doc)
+    display_manager.displaySalleAttente()
 
     doc.prescrire(romulus,nouveau_traitement_covid)
 
-    displaySalleAttente()
+    display_manager.displaySalleAttente()
 
-    displayCabinet(doc)
+    display_manager.displayCabinet(doc)
 
     doc.inviter_a_quitter(romulus,cabinet_Dr_X)
 
-    displayCabinet(doc)
-    displaySalleAttente()
+    display_manager.displayCabinet(doc)
+    display_manager.displaySalleAttente()
 
     romulus.seDeplacer(cabinet_Dr_X,pharma_chez_baba)
 
-    dataPharma_Baba = displayPharma(pharma_chez_baba,dataPharma_Baba)
+    dataPharma_Baba = display_manager.displayPharma(pharma_chez_baba,dataPharma_Baba)
 
     romulus.payerMedoc(romulus.poche,pharma_chez_baba)
 
-    dataPharma_Baba = displayPharma(pharma_chez_baba,dataPharma_Baba)
+    dataPharma_Baba = display_manager.displayPharma(pharma_chez_baba,dataPharma_Baba)
 
     romulus.seDeplacer(pharma_chez_baba,chez_romulus)     
 
     #REMUS SCENARIO 
     doc.inviter_a_entrer(remus,cabinet_Dr_X)
 
-    displayCabinet(doc)
-    displaySalleAttente()
+    display_manager.displayCabinet(doc)
+    display_manager.displaySalleAttente()
 
     doc.diagnostiquer(remus,covid)
     doc.se_faire_payer(remus,50)
 
-    displayCabinet(doc)
-  #  displaySalleAttente()
+    display_manager.displayCabinet(doc)
+  #  display_manager.displaySalleAttente()
 
     doc.prescrire(remus,nouveau_traitement_covid)
 
-  #  displaySalleAttente()
+  #  display_manager.displaySalleAttente()
 
-    displayCabinet(doc)
+    display_manager.displayCabinet(doc)
 
     doc.inviter_a_quitter(remus,cabinet_Dr_X)
 
-    displayCabinet(doc)
-   # displaySalleAttente()
+    display_manager.displayCabinet(doc)
+   # display_manager.displaySalleAttente()
 
     remus.seDeplacer(cabinet_Dr_X,pharma_chez_baba)
 
-    dataPharma_Baba = displayPharma(pharma_chez_baba,dataPharma_Baba)
+    dataPharma_Baba = display_manager.displayPharma(pharma_chez_baba,dataPharma_Baba)
 
     remus.payerMedoc(remus.poche,pharma_chez_baba)
 
-    dataPharma_Baba = displayPharma(pharma_chez_baba,dataPharma_Baba)
+    dataPharma_Baba = display_manager.displayPharma(pharma_chez_baba,dataPharma_Baba)
 
     remus.seDeplacer(pharma_chez_baba,chez_remus)
 
-    displayCimetiere()
+    display_manager.displayCimetiere()
+
+    display_manager.displayDiags()
+
+    display_manager.displayTraitements()
 
 
 
