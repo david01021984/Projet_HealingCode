@@ -166,6 +166,13 @@ class DisplayManager:
         self.root.title("H E A L T C A R E")
 
         # Créez des boutons pour les différentes fonctionnalités
+        ttk.Button(root, text="Mettre Patients dans SA", command=self.moveDansLaSalleAttente).pack(pady=5)
+        ttk.Button(root, text="MARCUS", command=self.scenarioMarcus).pack(pady=5)
+        ttk.Button(root, text="OPTIMUS", command=self.scenarioOptimus).pack(pady=5)
+        ttk.Button(root, text="SANGOKU", command=self.scenarioSangoku).pack(pady=5)
+        ttk.Button(root, text="VADOR", command=self.scenarioDarthvador).pack(pady=5)
+        ttk.Button(root, text="ROMULUS", command=self.scenarioRomulus).pack(pady=5)
+        ttk.Button(root, text="REMUS", command=self.scenarioRemus).pack(pady=5)
         ttk.Button(root, text="Afficher Salle d'Attente", command=lambda:self.displaySalleAttente(dataSA)).pack(pady=5)
         ttk.Button(root, text="Afficher Cabinet", command=lambda: self.displayCabinet(doc)).pack(pady=5)
         ttk.Button(root, text="Afficher Traitements", command=self.displayTraitements).pack(pady=5)
@@ -173,13 +180,81 @@ class DisplayManager:
         ttk.Button(root, text="Afficher Pharmacie", command=lambda: self.displayPharma(pharma_chez_baba)).pack(pady=5)
         ttk.Button(root, text="Afficher Cimetière", command=self.displayCimetiere).pack(pady=5)
 
-    def displaySalleAttente(self,data):
-        # dataSA = []
 
-        # for patient in Patient.Patients:
-        #     if patient.lieu == salle_attente_Dr_X.nom:
-        #         line = [f"{patient.nom}",f"{patient.maladie}",f"{patient.argent}",f"{patient.poche}",f"{patient.etat_de_sante}"]
-        #         dataSA.append(line)
+    def moveDansLaSalleAttente(self):
+        marcus.seDeplacer(chez_Marcus,salle_attente_Dr_X)
+        optimus.seDeplacer(chez_Optimus,salle_attente_Dr_X)
+        sangoku.seDeplacer(chez_sangoku,salle_attente_Dr_X)
+        darthvader.seDeplacer(chez_vador,salle_attente_Dr_X)
+        romulus.seDeplacer(chez_romulus,salle_attente_Dr_X)
+        remus.seDeplacer(chez_remus,salle_attente_Dr_X)
+        
+    def scenarioMarcus(self):
+        doc.inviter_a_entrer(marcus,cabinet_Dr_X)
+        doc.se_faire_payer(marcus,50)
+        doc.diagnostiquer(marcus,grippe)
+        doc.prescrire(marcus,antiviraux)
+        doc.inviter_a_quitter(marcus,cabinet_Dr_X)
+        marcus.seDeplacer(cabinet_Dr_X,pharma_chez_baba)
+        marcus.payerMedoc(marcus.poche,pharma_chez_baba)
+     #   marcus.seDeplacer(pharma_chez_baba,chez_Marcus)
+
+    def scenarioOptimus(self):
+        doc.inviter_a_entrer(optimus,cabinet_Dr_X)
+        doc.diagnostiquer(optimus,rhume_foin)
+        doc.se_faire_payer(optimus,50)
+        doc.prescrire(optimus,antihistaminique)
+        doc.inviter_a_quitter(optimus,cabinet_Dr_X)
+        optimus.seDeplacer(cabinet_Dr_X,pharma_chez_baba)
+        optimus.payerMedoc(optimus.poche,pharma_chez_baba)
+
+    def scenarioSangoku(self):    
+        #SANGOKU SCENARIO
+        doc.inviter_a_entrer(sangoku,cabinet_Dr_X)
+        doc.diagnostiquer(sangoku,hypertension)
+        doc.se_faire_payer(sangoku,50)
+        doc.prescrire(sangoku,sedocar)
+        doc.inviter_a_quitter(sangoku,cabinet_Dr_X)
+        sangoku.seDeplacer(cabinet_Dr_X,pharma_chez_baba)
+        sangoku.payerMedoc(sangoku.poche,pharma_chez_baba)
+
+     
+    def scenarioDarthvador(self):
+        #DARTHVADER SENARIO
+        doc.inviter_a_entrer(darthvader,cabinet_Dr_X)
+        doc.diagnostiquer(darthvader,infection_urinaire)
+        doc.se_faire_payer(darthvader,60)
+        doc.prescrire(darthvader,antibiotique)
+        doc.inviter_a_quitter(darthvader,cabinet_Dr_X)
+        darthvader.seDeplacer(cabinet_Dr_X,pharma_chez_baba)
+        darthvader.payerMedoc(darthvader.poche,pharma_chez_baba)
+
+        #ROMULUS SCENARIO 
+    def scenarioRomulus(self):
+        doc.inviter_a_entrer(romulus,cabinet_Dr_X)
+        doc.diagnostiquer(romulus,covid)
+        doc.se_faire_payer(romulus,50)
+        doc.prescrire(romulus,nouveau_traitement_covid)
+        doc.inviter_a_quitter(romulus,cabinet_Dr_X)
+        romulus.seDeplacer(cabinet_Dr_X,pharma_chez_baba)
+        romulus.payerMedoc(romulus.poche,pharma_chez_baba)
+
+    def scenarioRemus(self):        #REMUS SCENARIO 
+        doc.inviter_a_entrer(remus,cabinet_Dr_X)
+        doc.diagnostiquer(remus,covid)
+        doc.se_faire_payer(remus,50)
+        doc.prescrire(remus,nouveau_traitement_covid)
+        doc.inviter_a_quitter(remus,cabinet_Dr_X)
+        remus.seDeplacer(cabinet_Dr_X,pharma_chez_baba)
+        remus.payerMedoc(remus.poche,pharma_chez_baba)
+
+    def displaySalleAttente(self,data):
+        #dataSA = []
+
+        for patient in Patient.Patients:
+            if patient.lieu == salle_attente_Dr_X.nom:
+                line = [f"{patient.nom}",f"{patient.maladie}",f"{patient.argent}",f"{patient.poche}",f"{patient.etat_de_sante}"]
+                dataSA.append(line)
 
         self.display_table("Salle d'Attente", ["Nom", "Maladie", "Argent", "Prescription", "État de Santé"], data)
 
@@ -301,141 +376,7 @@ remus = Patient("Remus",60, chez_remus,poche=[])
 
 pharma_chez_baba = Pharmacie("Pharmacie chez Baba",["Le Pharmacien (Baba)"],[antiviraux,sedocar,insuline,antihistaminique,antibiotique,nouveau_traitement_covid])
 
-#on met tous les patients dans la salle d'attente
-marcus.seDeplacer(chez_Marcus,salle_attente_Dr_X)
-optimus.seDeplacer(chez_Optimus,salle_attente_Dr_X)
-sangoku.seDeplacer(chez_sangoku,salle_attente_Dr_X)
-darthvader.seDeplacer(chez_vador,salle_attente_Dr_X)
-romulus.seDeplacer(chez_romulus,salle_attente_Dr_X)
-remus.seDeplacer(chez_remus,salle_attente_Dr_X)
-
 dataSA = []
-
-for patient in Patient.Patients:
-    if patient.lieu == salle_attente_Dr_X.nom:
-        line = [f"{patient.nom}",f"{patient.maladie}",f"{patient.argent}",f"{patient.poche}",f"{patient.etat_de_sante}"]
-        dataSA.append(line)
-
-#MARCUS SCENARIO
-doc.inviter_a_entrer(marcus,cabinet_Dr_X)
-
-doc.se_faire_payer(marcus,50)
-doc.diagnostiquer(marcus,grippe)
-
-doc.prescrire(marcus,antiviraux)
-doc.inviter_a_quitter(marcus,cabinet_Dr_X)
-
-marcus.seDeplacer(cabinet_Dr_X,pharma_chez_baba)
-
-#dataPharma_Baba = DisplayManager.displayPharma(pharma_chez_baba,dataPharma_Baba)
-
-marcus.payerMedoc(marcus.poche,pharma_chez_baba)
-
-#dataPharma_Baba = DisplayManager.displayPharma(pharma_chez_baba,dataPharma_Baba)
-
-marcus.seDeplacer(pharma_chez_baba,chez_Marcus)
-
-#OPTIMUS SCENARIO
-
-doc.inviter_a_entrer(optimus,cabinet_Dr_X)
-
-doc.diagnostiquer(optimus,rhume_foin)
-doc.se_faire_payer(optimus,50)
-
-doc.prescrire(optimus,antihistaminique)
-
-doc.inviter_a_quitter(optimus,cabinet_Dr_X)
-
-optimus.seDeplacer(cabinet_Dr_X,pharma_chez_baba)
-
-#dataPharma_Baba = display_manager.displayPharma(pharma_chez_baba,dataPharma_Baba)
-
-optimus.payerMedoc(optimus.poche,pharma_chez_baba)
-
-#dataPharma_Baba = display_manager.displayPharma(pharma_chez_baba,dataPharma_Baba)
-
-#optimus.seDeplacer(pharma_chez_baba,chez_Optimus)
-
-#SANGOKU SCENARIO
-doc.inviter_a_entrer(sangoku,cabinet_Dr_X)
-
-doc.diagnostiquer(sangoku,hypertension)
-doc.se_faire_payer(sangoku,50)
-
-doc.prescrire(sangoku,sedocar)
-
-doc.inviter_a_quitter(sangoku,cabinet_Dr_X)
-
-sangoku.seDeplacer(cabinet_Dr_X,pharma_chez_baba)
-
-#dataPharma_Baba = display_manager.displayPharma(pharma_chez_baba,dataPharma_Baba)
-
-sangoku.payerMedoc(sangoku.poche,pharma_chez_baba)
-
-#dataPharma_Baba = display_manager.displayPharma(pharma_chez_baba,dataPharma_Baba)
-
-#sangoku.seDeplacer(pharma_chez_baba,chez_sangoku)
-
-#DARTHVADER SENARIO
-doc.inviter_a_entrer(darthvader,cabinet_Dr_X)
-
-doc.diagnostiquer(darthvader,infection_urinaire)
-doc.se_faire_payer(darthvader,60)
-
-doc.prescrire(darthvader,antibiotique)
-
-doc.inviter_a_quitter(darthvader,cabinet_Dr_X)
-
-darthvader.seDeplacer(cabinet_Dr_X,pharma_chez_baba)
-
-#dataPharma_Baba = display_manager.displayPharma(pharma_chez_baba,dataPharma_Baba)
-
-darthvader.payerMedoc(darthvader.poche,pharma_chez_baba)
-
-#ataPharma_Baba = display_manager.displayPharma(pharma_chez_baba,dataPharma_Baba)
-
-#darthvader.seDeplacer(pharma_chez_baba,chez_vador)
-
-#ROMULUS SCENARIO 
-
-doc.inviter_a_entrer(romulus,cabinet_Dr_X)
-
-doc.diagnostiquer(romulus,covid)
-doc.se_faire_payer(romulus,50)
-
-doc.prescrire(romulus,nouveau_traitement_covid)
-
-doc.inviter_a_quitter(romulus,cabinet_Dr_X)
-
-romulus.seDeplacer(cabinet_Dr_X,pharma_chez_baba)
-
-#dataPharma_Baba = display_manager.displayPharma(pharma_chez_baba,dataPharma_Baba)
-
-romulus.payerMedoc(romulus.poche,pharma_chez_baba)
-
-#dataPharma_Baba = display_manager.displayPharma(pharma_chez_baba,dataPharma_Baba)
-
-#romulus.seDeplacer(pharma_chez_baba,chez_romulus)     
-
-#REMUS SCENARIO 
-doc.inviter_a_entrer(remus,cabinet_Dr_X)
-
-doc.diagnostiquer(remus,covid)
-doc.se_faire_payer(remus,50)
-
-doc.prescrire(remus,nouveau_traitement_covid)
-
-doc.inviter_a_quitter(remus,cabinet_Dr_X)
-
-remus.seDeplacer(cabinet_Dr_X,pharma_chez_baba)
-
-#dataPharma_Baba = display_manager.displayPharma(pharma_chez_baba,dataPharma_Baba)
-
-remus.payerMedoc(remus.poche,pharma_chez_baba)
-
-#dataPharma_Baba = display_manager.displayPharma(pharma_chez_baba,dataPharma_Baba)
-
-#remus.seDeplacer(pharma_chez_baba,chez_remus)
 
 # Initialisation de l'interface graphique
 root = tk.Tk()
